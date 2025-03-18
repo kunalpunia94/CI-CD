@@ -1,10 +1,11 @@
-name: Test Self-Hosted Runner
+name: Deploy with Docker to AWS EC2
 
 on: [push, pull_request]
 
 jobs:
-  test-runner:
-    runs-on: self-hosted
+  deploy:
+    runs-on: self-hosted  # Runs on your AWS EC2 instance
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -14,3 +15,21 @@ jobs:
 
       - name: List Files
         run: ls -alh
+
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build Docker Image
+        run: docker build -t kunalpunia94/my-app:latest .
+
+      - name: Tag and Push Docker Image
+        run: |
+          docker tag kunalpunia94/my-app:latest kunalpunia94/my-app:latest
+          docker push kunalpunia94/my-app:latest
+
+      - name: Deploy Container on EC2
+        run: |
+          docker stop my-app-container || true
+          docker rm my-app-container || true
+          docker pull kunalpunia94/my-app:latest
+          docker run -d --name my-app-container -p 80:80 kunalpunia94/my-app:latest
