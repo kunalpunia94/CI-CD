@@ -1,0 +1,19 @@
+name: Deploy to AWS EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted  # Uses your EC2 runner
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Run Deployment Script
+        run: |
+          echo "Deploying application..."
+          # Example deployment command (adjust as needed)
+          bash deploy.sh
